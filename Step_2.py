@@ -5,14 +5,14 @@ import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
-
+import datetime as dt
 from flask import Flask, jsonify
 
 # Database Setup
 #################################################
 engine = create_engine("sqlite:///Resources/hawaii.sqlite")
 
-
+session = Session(engine)
 # reflect an existing database into a new model
 Base = automap_base()
 # reflect the tables
@@ -67,7 +67,7 @@ def precipitation():
     precipitation = {k:v for k,v in prcp }
     
 
-    return jsonify(date: prcp)
+    return jsonify(precipitation)
 
 @app.route("/api/v1.0/precipitation")
 def temperature():
@@ -76,7 +76,22 @@ def temperature():
     #copy query_date from other Jupyter file
     temperature = {k:v for k,v in temp }
 
-    return jsonify(date:temp)
+    return jsonify(temperature)
+
+def stations():
+    #list stations
+    station = session.query(station.station).all()
+
+    return jsonify(station)
+
+def station_temp_range():
+    #return temps for busiest station in defined year range
+    temp = session.query(measure.tobs).filter(measure.date >= query_date).filter(measure.station == "USC00519281").all()#.group_by(measure.station).order_by(func.count(measure.tobs).desc())..all()
+    return jsonify(temp)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
+
+
 #ravel, dictionary comprehensions
