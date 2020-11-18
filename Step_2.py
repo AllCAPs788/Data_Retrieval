@@ -62,12 +62,15 @@ def welcome():
 @app.route("/api/v1.0/precipitation")
 def precipitation():
     """List all available api routes."""
-    prcp = session.query(measure.date, measure.prcp).filter(measure.date >= query_date).all()
-    #copy query_date from other Jupyter file
-    precipitation = {k:v for k,v in prcp }
     
-
+    
+    #copy query_date from other Jupyter file
+    
+    precipitation = {k:v for k,v in time_frame }
+    
+    
     return jsonify(precipitation)
+    
 
 @app.route("/api/v1.0/precipitation")
 def temperature():
@@ -77,13 +80,13 @@ def temperature():
     temperature = {k:v for k,v in temp }
 
     return jsonify(temperature)
-
+@app.route("/api/v1.0/stations")
 def stations():
     #list stations
     station = session.query(station.station).all()
 
     return jsonify(station)
-
+@app.route("/api/v1.0/tobs")
 def station_temp_range():
     #return temps for busiest station in defined year range
     temp = session.query(measure.tobs).filter(measure.date >= query_date).filter(measure.station == "USC00519281").all()#.group_by(measure.station).order_by(func.count(measure.tobs).desc())..all()
