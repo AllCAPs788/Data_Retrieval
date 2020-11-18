@@ -30,7 +30,19 @@ Base.classes.keys()
 measure = Base.classes.measurement
 station = Base.classes.station
 
+ # Design a query to retrieve the last 12 months of precipitation data and plot the results
+months = session.query(measure.date).order_by(measure.date.desc()).first()
+months
+#Ins_dates examples
 
+
+#session.query(Invoices.BillingCountry).group_by(Invoices.BillingCountry).all()
+# Calculate the date 1 year ago from the last data point in the database
+query_date = dt.date(2017, 8, 23) - dt.timedelta(days=365)
+query_date
+# Perform a query to retrieve the precipitation scores and dates
+time_frame = session.query(measure.date, measure.prcp).filter(measure.date >= query_date).all()
+time_frame
 # Flask Setup
 #################################################
 app = Flask(__name__)
@@ -50,14 +62,21 @@ def welcome():
 @app.route("/api/v1.0/precipitation")
 def precipitation():
     """List all available api routes."""
-    #prcp = session.query(measure.date, measure.prcp).filter(year statement).all()
+    prcp = session.query(measure.date, measure.prcp).filter(measure.date >= query_date).all()
     #copy query_date from other Jupyter file
     precipitation = {k:v for k,v in prcp }
     
 
-    return jsonify(date: )
+    return jsonify(date: prcp)
 
+@app.route("/api/v1.0/precipitation")
+def temperature():
+    """List all available api routes."""
+    temp = session.query(measure.date, measure.tobs).filter(measure.date >= query_date).all()
+    #copy query_date from other Jupyter file
+    temperature = {k:v for k,v in temp }
 
+    return jsonify(date:temp)
 if __name__ == "__main__":
     app.run(debug=True)
 #ravel, dictionary comprehensions
