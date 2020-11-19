@@ -35,7 +35,7 @@ months = session.query(measure.date).order_by(measure.date.desc()).first()
 months
 #Ins_dates examples
 
-
+nu_station = session.query(station.station).all()
 #session.query(Invoices.BillingCountry).group_by(Invoices.BillingCountry).all()
 # Calculate the date 1 year ago from the last data point in the database
 query_date = dt.date(2017, 8, 23) - dt.timedelta(days=365)
@@ -43,11 +43,13 @@ query_date
 # Perform a query to retrieve the precipitation scores and dates
 time_frame = session.query(measure.date, measure.prcp).filter(measure.date >= query_date).all()
 time_frame
+
+temp = session.query(measure.date, measure.tobs).filter(measure.date >= query_date).all()
 # Flask Setup
 #################################################
 app = Flask(__name__)
 
-
+session.close()
 
 @app.route("/")
 def welcome():
@@ -75,21 +77,25 @@ def precipitation():
 @app.route("/api/v1.0/precipitation")
 def temperature():
     """List all available api routes."""
-    temp = session.query(measure.date, measure.tobs).filter(measure.date >= query_date).all()
+    
     #copy query_date from other Jupyter file
     temperature = {k:v for k,v in temp }
 
-    return jsonify(temperature)
+    return jsonify(temp)
+
+
 @app.route("/api/v1.0/stations")
 def stations():
     #list stations
-    station = session.query(station.station).all()
-
-    return jsonify(station)
+    #print([a for a in dir(station) if not a.startswith("_")])
+    
+    
+    return jsonify(nu_station)
+    
 @app.route("/api/v1.0/tobs")
 def station_temp_range():
     #return temps for busiest station in defined year range
-    temp = session.query(measure.tobs).filter(measure.date >= query_date).filter(measure.station == "USC00519281").all()#.group_by(measure.station).order_by(func.count(measure.tobs).desc())..all()
+    #temp = session.query(measure.tobs).filter(measure.date >= query_date).filter(measure.station == "USC00519281").all()#.group_by(measure.station).order_by(func.count(measure.tobs).desc())..all()
     return jsonify(temp)
 
 
