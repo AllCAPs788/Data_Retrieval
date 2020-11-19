@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 import datetime as dt
 from flask import Flask, jsonify
-
+from sqlalchemy import func
 # Database Setup
 #################################################
 engine = create_engine("sqlite:///Resources/hawaii.sqlite")
@@ -40,11 +40,19 @@ nu_station = session.query(station.station).all()
 # Calculate the date 1 year ago from the last data point in the database
 query_date = dt.date(2017, 8, 23) - dt.timedelta(days=365)
 query_date
+
+start_date = dt.date(2016, 8, 23)
 # Perform a query to retrieve the precipitation scores and dates
 time_frame = session.query(measure.date, measure.prcp).filter(measure.date >= query_date).all()
 time_frame
 
-temp = session.query(measure.date, measure.tobs).filter(measure.date >= query_date).all()
+TMIN =session.query(measure.date, func.min(measure.tobs)).filter(measure.date >= query_date).first()
+TMAX =session.query(measure.date, func.max(measure.tobs)).filter(measure.date >= query_date).first()
+TAVG =session.query(measure.date, func.avg(measure.tobs)).filter(measure.date >= query_date).first()
+
+temp = session.query(measure.tobs).filter(measure.date >= query_date).filter(measure.station == "USC00519281").all()
+#temp = session.query(measure.date, measure.tobs).filter(measure.date >= query_date).all()
+
 # Flask Setup
 #################################################
 app = Flask(__name__)
@@ -58,7 +66,8 @@ def welcome():
         f"Available Routes:<br/>"
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
-        f"/api/v1.0/tobs"
+        f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/2016-08-23_to_2017-08-23"
     )
 
 @app.route("/api/v1.0/precipitation")
@@ -98,6 +107,19 @@ def station_temp_range():
     #temp = session.query(measure.tobs).filter(measure.date >= query_date).filter(measure.station == "USC00519281").all()#.group_by(measure.station).order_by(func.count(measure.tobs).desc())..all()
     return jsonify(temp)
 
+@app.route("/2016-08-23_to_2017-08-23")
+def year_temps():
+    #list stations
+    #print([a for a in dir(station) if not a.startswith("_")])
+    
+    
+    return jsonify (
+        f"Minimum = {TMIN}."
+        f"Maximum = {TMAX}."
+        f"Average = {TAVG}."
+         )
+
+    
 
 if __name__ == "__main__":
     app.run(debug=True)
